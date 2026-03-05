@@ -3,125 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JARVIS - Cloud Edition</title>
+    <title>JARVIS - Tejas Edition</title>
     <style>
-        /* Modern Dark UI */
-        body {
-            background-color: #000;
-            color: #00e5ff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-        }
-
-        /* Arc Reactor Animation */
-        #arc-reactor {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            border: 5px solid #00e5ff;
-            box-shadow: 0 0 50px #00e5ff, inset 0 0 50px #00e5ff;
-            cursor: pointer;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.8; }
-        }
-
-        #status {
-            margin-top: 20px;
-            font-size: 1.2rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        #chat-box {
-            margin-top: 20px;
-            width: 80%;
-            max-width: 600px;
-            background: rgba(0, 229, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #00e5ff;
-            text-align: center;
-        }
+        body { background: #000; color: #00e5ff; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        #arc-reactor { width: 180px; height: 180px; border-radius: 50%; border: 5px solid #00e5ff; box-shadow: 0 0 50px #00e5ff; cursor: pointer; animation: pulse 2s infinite; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 0.8rem; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        #status { margin-top: 25px; font-weight: bold; text-transform: uppercase; }
+        #response { margin-top: 10px; width: 85%; text-align: center; color: #fff; }
     </style>
 </head>
 <body>
 
-    <div id="arc-reactor" onclick="startJarvis()">
-        <span id="inner-circle" style="font-size: 0.8rem;">TAP TO START</span>
-    </div>
-
-    <div id="status">Online & Ready, Sir.</div>
-    <div id="chat-box" id="response-text">Waiting for command...</div>
+    <div id="arc-reactor" onclick="startJarvis()">JARVIS<br>BY TEJAS</div>
+    <div id="status">Ready for your command, Sir.</div>
+    <div id="response"></div>
 
     <script>
-        const statusText = document.getElementById('status');
-        const responseBox = document.getElementById('chat-box');
+        const statusDiv = document.getElementById('status');
+        const responseDiv = document.getElementById('response');
 
-        // JARVIS KI AWAAZ (Speaker)
         function speak(text) {
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.rate = 1.0;
-            utterance.pitch = 1.0;
+            const voices = window.speechSynthesis.getVoices();
+            const maleVoice = voices.find(v => v.name.includes('Male') || v.name.includes('David'));
+            if (maleVoice) utterance.voice = maleVoice;
+            utterance.pitch = 0.8;
             window.speechSynthesis.speak(utterance);
         }
 
-        // JARVIS KA KAAN (Microphone)
         function startJarvis() {
             const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = 'en-US';
+            recognition.lang = 'en-IN';
 
-            recognition.onstart = () => {
-                statusText.innerText = "Listening...";
-                statusText.style.color = "red";
-            };
+            recognition.onstart = () => { statusDiv.innerText = "Listening..."; };
 
             recognition.onresult = async (event) => {
-                const transcript = event.results[0][0].transcript;
-                responseBox.innerText = "You: " + transcript;
+                let query = event.results[0][0].transcript.toLowerCase();
+                statusDiv.innerText = "Executing...";
+
+                // --- AUTOMATION LOGIC ---
                 
-                // Server (Python) ko message bhejna
-                statusText.innerText = "Processing...";
-                statusText.style.color = "#00e5ff";
-
-                try {
-                    const response = await fetch('/chat', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ message: transcript })
-                    });
-                    const data = await response.json();
-                    
-                    // Jarvis ka Jawab Dikhao aur Bolo
-                    responseBox.innerText = "Jarvis: " + data.response;
-                    speak(data.response);
-                } catch (error) {
-                    console.error("Error:", error);
-                    responseBox.innerText = "Error connecting to server.";
+                // 1. YouTube par gaana bajana
+                if (query.includes("play")) {
+                    let song = query.replace("play", "").trim();
+                    speak("Playing " + song + " on YouTube, Sir.");
+                    window.open(`https://www.youtube.com/results?search_query=${song}`, "_blank");
+                    return;
                 }
+
+                // 2. Koi bhi Website kholna (Google, Insta, FB)
+                if (query.includes("open")) {
+                    let site = query.replace("open", "").trim();
+                    speak("Opening " + site + ", Sir.");
+                    window.open(`https://www.${site}.com`, "_blank");
+                    return;
+                }
+
+                // 3. Google Search
+                if (query.includes("search for")) {
+                    let term = query.replace("search for", "").trim();
+                    speak("Searching Google for " + term + ", Sir.");
+                    window.open(`https://www.google.com/search?q=${term}`, "_blank");
+                    return;
+                }
+
+                // 4. Baki sab ke liye AI (Introduction included)
+                const res = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: query })
+                });
+                const data = await res.json();
+                responseDiv.innerText = data.response;
+                speak(data.response);
             };
 
-            recognition.onend = () => {
-                statusText.innerText = "Online & Ready, Sir.";
-                statusText.style.color = "#00e5ff";
-            };
-
+            recognition.onend = () => { statusDiv.innerText = "System Idle."; };
             recognition.start();
         }
+        window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
     </script>
 </body>
 </html>
