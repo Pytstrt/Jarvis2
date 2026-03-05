@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JARVIS - Tejas Edition</title>
+    <title>JARVIS</title>
     <style>
         body { background: #000; color: #00e5ff; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
         #arc-reactor { width: 180px; height: 180px; border-radius: 50%; border: 5px solid #00e5ff; box-shadow: 0 0 50px #00e5ff; cursor: pointer; animation: pulse 2s infinite; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 0.8rem; }
@@ -15,7 +15,7 @@
 <body>
 
     <div id="arc-reactor" onclick="startJarvis()">JARVIS<br>BY TEJAS</div>
-    <div id="status">Ready for your command, Sir.</div>
+    <div id="status">Ready for orders.</div>
     <div id="response"></div>
 
     <script>
@@ -41,33 +41,21 @@
                 let query = event.results[0][0].transcript.toLowerCase();
                 statusDiv.innerText = "Executing...";
 
-                // --- AUTOMATION LOGIC ---
-                
-                // 1. YouTube par gaana bajana
+                // Automation with no 'Sir'
                 if (query.includes("play")) {
                     let song = query.replace("play", "").trim();
-                    speak("Playing " + song + " on YouTube, Sir.");
+                    speak("Playing " + song);
                     window.open(`https://www.youtube.com/results?search_query=${song}`, "_blank");
                     return;
                 }
 
-                // 2. Koi bhi Website kholna (Google, Insta, FB)
                 if (query.includes("open")) {
                     let site = query.replace("open", "").trim();
-                    speak("Opening " + site + ", Sir.");
+                    speak("Opening " + site);
                     window.open(`https://www.${site}.com`, "_blank");
                     return;
                 }
 
-                // 3. Google Search
-                if (query.includes("search for")) {
-                    let term = query.replace("search for", "").trim();
-                    speak("Searching Google for " + term + ", Sir.");
-                    window.open(`https://www.google.com/search?q=${term}`, "_blank");
-                    return;
-                }
-
-                // 4. Baki sab ke liye AI (Introduction included)
                 const res = await fetch('/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
