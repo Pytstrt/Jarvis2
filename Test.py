@@ -1,14 +1,13 @@
 import os
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
 from langchain_groq import ChatGroq
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 app = FastAPI()
 
-# CORS settings taaki browser se request block na ho
+# CORS taaki koi connectivity issue na ho
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,16 +15,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# API Key load karna (Jo aapne Render dashboard par daali hai)
+# API Key aur Model Setup
 groq_api_key = os.getenv("GROQ_API_KEY")
-model_name = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
-
-# ChatGroq Setup
-llm = ChatGroq(groq_api_key=groq_api_key, model_name=model_name)
+llm = ChatGroq(groq_api_key=groq_api_key, model_name="llama-3.3-70b-versatile")
 
 @app.get("/", response_class=HTMLResponse)
 async def get_ui():
-    # Ye aapki index.html file ko load karega
     with open("index.html", "r", encoding="utf-8") as f:
         return f.read()
 
@@ -34,17 +29,24 @@ async def chat_endpoint(request: Request):
     data = await request.json()
     user_message = data.get("message")
     
-    if not user_message:
-        return {"response": "Sir, mujhe kuch sunai nahi diya."}
+    # SYSTEM PROMPT: Yahan humne CM aur Male persona set kiya hai
+    system_prompt = (
+        "You are JARVIS, Tony Stark's AI assistant. Your tone is professional, witty, and loyal. "
+        "IMPORTANT INFO: The current Chief Minister of Haryana is Nayab Singh Saini. "
+        "Always address the user as 'Sir'. Keep responses concise."
+    )
+    
+    messages = [
+        ("system", system_prompt),
+        ("human", user_message)
+    ]
 
-    # AI se jawab mangna
     try:
-        response = llm.invoke(user_message)
+        response = llm.invoke(messages)
         return {"response": response.content}
     except Exception as e:
-        return {"response": f"Error: {str(e)}"}
+        return {"response": f"System error, Sir: {str(e)}"}
 
 if __name__ == "__main__":
-    # Local testing ke liye (Render par ye command dashboard se chalti hai)
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
