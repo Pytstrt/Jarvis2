@@ -2,9 +2,4 @@ fastapi
 uvicorn
 langchain-groq
 edge-tts
-pygame
-psutil
-speechrecognition
-pywhatkit
 nest-asyncio
-PyAudio
