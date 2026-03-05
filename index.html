@@ -3,220 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JARVIS - Neural Interface</title>
+    <title>JARVIS - Cloud Edition</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap');
-
+        /* Modern Dark UI */
         body {
-            background: radial-gradient(circle at center, #051923 0%, #000000 100%);
-            color: #00d2ff;
-            font-family: 'Rajdhani', sans-serif;
-            margin: 0;
-            height: 100vh;
+            background-color: #000;
+            color: #00e5ff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
             overflow: hidden;
         }
 
-        /* Animated Background Grid */
-        body::before {
-            content: "";
-            position: absolute;
-            width: 200%; height: 200%;
-            background-image: linear-gradient(rgba(0, 210, 255, 0.05) 1px, transparent 1px), 
-                              linear-gradient(90deg, rgba(0, 210, 255, 0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
-            transform: perspective(500px) rotateX(60deg);
-            animation: grid-move 20s linear infinite;
-            z-index: -1;
-        }
-
-        @keyframes grid-move {
-            from { transform: perspective(500px) rotateX(60deg) translateY(0); }
-            to { transform: perspective(500px) rotateX(60deg) translateY(50px); }
-        }
-
-        /* Arc Reactor Button */
-        .reactor-container {
-            margin-top: 50px;
-            position: relative;
+        /* Arc Reactor Animation */
+        #arc-reactor {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 5px solid #00e5ff;
+            box-shadow: 0 0 50px #00e5ff, inset 0 0 50px #00e5ff;
             cursor: pointer;
             transition: 0.3s;
-        }
-
-        .reactor {
-            width: 120px; height: 120px;
-            border-radius: 50%;
-            background: rgba(0, 210, 255, 0.1);
-            border: 4px solid #00d2ff;
-            box-shadow: 0 0 20px #00d2ff, inset 0 0 20px #00d2ff;
-            display: flex; justify-content: center; align-items: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             animation: pulse 2s infinite;
         }
 
-        .reactor-core {
-            width: 60px; height: 60px;
-            background: #fff;
-            border-radius: 50%;
-            box-shadow: 0 0 30px #fff;
-        }
-
-        .listening .reactor {
-            border-color: #ff3333;
-            box-shadow: 0 0 30px #ff3333, inset 0 0 20px #ff3333;
-            animation: fast-pulse 0.5s infinite;
-        }
-
         @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.8; }
+            0% { transform: scale(1); opacity: 0.8; }
             50% { transform: scale(1.05); opacity: 1; }
-        }
-
-        @keyframes fast-pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        /* Chat Display */
-        #chat-container {
-            width: 80%;
-            max-width: 600px;
-            height: 350px;
-            margin-top: 30px;
-            background: rgba(0, 40, 60, 0.3);
-            border: 1px solid rgba(0, 210, 255, 0.3);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            scrollbar-width: thin;
-        }
-
-        .msg {
-            padding: 10px 15px;
-            border-radius: 8px;
-            max-width: 80%;
-            font-size: 1.1rem;
-            letter-spacing: 1px;
-        }
-
-        .user-msg {
-            align-self: flex-end;
-            background: rgba(255, 204, 0, 0.1);
-            border-right: 4px solid #ffcc00;
-            color: #ffcc00;
-        }
-
-        .jarvis-msg {
-            align-self: flex-start;
-            background: rgba(0, 210, 255, 0.1);
-            border-left: 4px solid #00d2ff;
-            color: #00d2ff;
-        }
-
-        .label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-            display: block;
-            opacity: 0.7;
+            100% { transform: scale(1); opacity: 0.8; }
         }
 
         #status {
-            margin-top: 15px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.8rem;
+            margin-top: 20px;
+            font-size: 1.2rem;
+            text-transform: uppercase;
             letter-spacing: 2px;
-            text-shadow: 0 0 5px #00d2ff;
+        }
+
+        #chat-box {
+            margin-top: 20px;
+            width: 80%;
+            max-width: 600px;
+            background: rgba(0, 229, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #00e5ff;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
-    <div id="status">SYSTEM IDLE</div>
-
-    <div class="reactor-container" id="mic-btn" onclick="startJarvis()">
-        <div class="reactor">
-            <div class="reactor-core"></div>
-        </div>
+    <div id="arc-reactor" onclick="startJarvis()">
+        <span id="inner-circle" style="font-size: 0.8rem;">TAP TO START</span>
     </div>
 
-    <div id="chat-container">
-        </div>
+    <div id="status">Online & Ready, Sir.</div>
+    <div id="chat-box" id="response-text">Waiting for command...</div>
 
     <script>
-        const chatContainer = document.getElementById('chat-container');
-        const status = document.getElementById('status');
-        const micBtn = document.getElementById('mic-btn');
+        const statusText = document.getElementById('status');
+        const responseBox = document.getElementById('chat-box');
 
-        // Speech recognition setup
-        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        recognition.lang = 'en-US';
-        recognition.continuous = false;
-
+        // JARVIS KI AWAAZ (Speaker)
         function speak(text) {
-            window.speechSynthesis.cancel();
-            const utter = new SpeechSynthesisUtterance(text);
-            const voices = window.speechSynthesis.getVoices();
-            // Try to get a professional male voice
-            utter.voice = voices.find(v => v.name.includes("David") || v.name.includes("Male")) || voices[0];
-            utter.rate = 1.0;
-            utter.pitch = 0.8;
-            window.speechSynthesis.speak(utter);
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 1.0;
+            utterance.pitch = 1.0;
+            window.speechSynthesis.speak(utterance);
         }
 
+        // JARVIS KA KAAN (Microphone)
         function startJarvis() {
-            recognition.start();
-            micBtn.classList.add('listening');
-            status.innerText = "LISTENING...";
-        }
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'en-US';
 
-        recognition.onresult = async (event) => {
-            micBtn.classList.remove('listening');
-            const userText = event.results[0][0].transcript;
-            addMsg('user', userText);
-            status.innerText = "THINKING...";
+            recognition.onstart = () => {
+                statusText.innerText = "Listening...";
+                statusText.style.color = "red";
+            };
 
-            try {
-                const response = await fetch('http://localhost:8000/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: userText })
-                });
-                const data = await response.json();
+            recognition.onresult = async (event) => {
+                const transcript = event.results[0][0].transcript;
+                responseBox.innerText = "You: " + transcript;
                 
-                addMsg('jarvis', data.reply);
-                speak(data.reply);
-                status.innerText = "ONLINE";
+                // Server (Python) ko message bhejna
+                statusText.innerText = "Processing...";
+                statusText.style.color = "#00e5ff";
 
-                if (data.action) {
-                    setTimeout(() => window.open(data.action, '_blank'), 1000);
+                try {
+                    const response = await fetch('/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: transcript })
+                    });
+                    const data = await response.json();
+                    
+                    // Jarvis ka Jawab Dikhao aur Bolo
+                    responseBox.innerText = "Jarvis: " + data.response;
+                    speak(data.response);
+                } catch (error) {
+                    console.error("Error:", error);
+                    responseBox.innerText = "Error connecting to server.";
                 }
-            } catch (err) {
-                status.innerText = "OFFLINE - SERVER ERROR";
-                console.error(err);
-            }
-        };
+            };
 
-        recognition.onerror = () => {
-            micBtn.classList.remove('listening');
-            status.innerText = "ERROR - RETRY";
-        };
+            recognition.onend = () => {
+                statusText.innerText = "Online & Ready, Sir.";
+                statusText.style.color = "#00e5ff";
+            };
 
-        function addMsg(role, text) {
-            const div = document.createElement('div');
-            div.className = `msg ${role === 'user' ? 'user-msg' : 'jarvis-msg'}`;
-            div.innerHTML = `<span class="label">${role}</span> ${text}`;
-            chatContainer.appendChild(div);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            recognition.start();
         }
-
-        // Pre-load voices
-        window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
     </script>
 </body>
 </html>
