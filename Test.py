@@ -7,6 +7,7 @@ import uvicorn
 
 app = FastAPI()
 
+# CORS allow karna taaki browser block na kare
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -14,6 +15,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Groq Setup
 groq_api_key = os.getenv("GROQ_API_KEY")
 llm = ChatGroq(groq_api_key=groq_api_key, model_name="llama-3.3-70b-versatile")
 
@@ -27,11 +29,11 @@ async def chat_endpoint(request: Request):
     data = await request.json()
     user_message = data.get("message").lower()
     
-    # Updated System Prompt: Removed 'Sir' instruction
+    # System Instructions
     system_prompt = (
-        "You are JARVIS. When asked 'who are you', you must reply: 'I am Jarvis, your PA made by Tejas sir.' "
-        "Do NOT address the user as 'Sir'. Keep your tone cool, direct, and witty. "
-        "The current CM of Haryana is Nayab Singh Saini."
+        "You are JARVIS. Identity: I am Jarvis, your PA made by Tejas sir. "
+        "Strict Rule: Do NOT call the user 'Sir'. Be cool, fast, and helpful. "
+        "Context: Haryana CM is Nayab Singh Saini."
     )
     
     messages = [("system", system_prompt), ("human", user_message)]
@@ -40,7 +42,7 @@ async def chat_endpoint(request: Request):
         response = llm.invoke(messages)
         return {"response": response.content}
     except Exception as e:
-        return {"response": f"System error: {str(e)}"}
+        return {"response": f"Error in brain: {str(e)}"}
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
