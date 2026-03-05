@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JARVIS - ALWAYS ACTIVE</title>
+    <title>JARVIS - Male Voice Fix</title>
     <style>
         body { background: #000; color: #00e5ff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
         #arc-reactor { 
             width: 160px; height: 160px; border-radius: 50%; border: 4px solid #00e5ff; 
-            box-shadow: 0 0 40px #00e5ff; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; transition: 0.3s;
+            box-shadow: 0 0 40px #00e5ff; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold;
         }
         .active { border-color: #ff0000 !important; box-shadow: 0 0 60px #ff0000 !important; animation: pulse 1s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
         #status { margin-top: 25px; letter-spacing: 2px; font-size: 14px; }
-        #output { margin-top: 15px; width: 85%; text-align: center; color: white; font-style: italic; }
+        #output { margin-top: 15px; width: 85%; text-align: center; color: white; }
     </style>
 </head>
 <body>
 
-    <div id="arc-reactor" onclick="toggleMic()">JARVIS<br>OFFLINE</div>
-    <div id="status">CLICK TO INITIALIZE SYSTEM</div>
+    <div id="arc-reactor" onclick="toggleMic()">JARVIS<br>SYSTEM</div>
+    <div id="status">CLICK TO START</div>
     <div id="output"></div>
 
     <script>
@@ -28,24 +28,44 @@
         const outputDiv = document.getElementById('output');
         let recognition;
         let isActive = false;
-        let wakeWordMode = true;
 
+        // --- IMPROVED MALE VOICE ENGINE ---
         function speak(text) {
             const utterance = new SpeechSynthesisUtterance(text);
+            
+            // Sabhi available voices nikalein
             const voices = window.speechSynthesis.getVoices();
-            // Deep Male Voice Filter
-            const maleVoice = voices.find(v => v.name.includes('Male') || v.name.includes('David') || v.name.includes('Google US English'));
-            if (maleVoice) utterance.voice = maleVoice;
-            utterance.pitch = 0.8; // Deep voice
-            utterance.rate = 1.0;
+            
+            // Male voices ki priority list
+            let maleVoice = voices.find(v => v.name.includes('Google US English Male')) || 
+                            voices.find(v => v.name.includes('Microsoft David')) ||
+                            voices.find(v => v.name.includes('Male')) ||
+                            voices.find(v => v.lang.includes('en-US') && v.name.includes('English'));
+
+            if (maleVoice) {
+                utterance.voice = maleVoice;
+                console.log("Selected Voice:", maleVoice.name);
+            }
+
+            // Robotic/Deep Voice settings
+            utterance.pitch = 0.7; // 0.1 se 2 tak (jitna kam, utni bhari awaaz)
+            utterance.rate = 0.9;  // Thoda dheere professional bolne ke liye
+            utterance.volume = 1;
+
             window.speechSynthesis.speak(utterance);
         }
+
+        // Browsers like Chrome need this to load voices properly
+        window.speechSynthesis.onvoiceschanged = () => {
+            console.log("Voices loaded:", window.speechSynthesis.getVoices().length);
+        };
 
         function toggleMic() {
             if (!recognition) {
                 startSystem();
-                reactor.innerText = "SYSTEM\nONLINE";
+                reactor.innerText = "SYSTEM\nACTIVE";
                 statusDiv.innerText = "SAY 'HEY JARVIS'";
+                speak("Systems initialized and ready.");
             }
         }
 
@@ -63,12 +83,11 @@
                     isActive = true;
                     reactor.classList.add('active');
                     statusDiv.innerText = "LISTENING...";
-                    speak("I am here. What do you need?");
+                    speak("Go ahead.");
                     return;
                 }
 
                 if (isActive) {
-                    // Automation
                     if (transcript.includes("play")) {
                         let song = transcript.replace("play", "").trim();
                         speak("Playing " + song);
@@ -76,11 +95,10 @@
                     } 
                     else if (transcript.includes("open")) {
                         let site = transcript.replace("open", "").trim();
-                        speak("Opening " + site);
+                        speak("Accessing " + site);
                         window.open(`https://www.${site.replace(/\s/g, '')}.com`, "_blank");
                     }
                     else {
-                        // AI Chat
                         const res = await fetch('/chat', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -96,11 +114,9 @@
                 }
             };
 
-            recognition.onend = () => { recognition.start(); }; // Keep mic alive
+            recognition.onend = () => { recognition.start(); };
             recognition.start();
         }
-
-        window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
     </script>
 </body>
 </html>
