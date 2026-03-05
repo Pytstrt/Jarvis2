@@ -27,10 +27,11 @@ async def chat_endpoint(request: Request):
     data = await request.json()
     user_message = data.get("message").lower()
     
-    # SYSTEM PROMPT: Aapka introduction aur identity
+    # Updated System Prompt: Removed 'Sir' instruction
     system_prompt = (
         "You are JARVIS. When asked 'who are you', you must reply: 'I am Jarvis, your PA made by Tejas sir.' "
-        "Address the user as 'Sir'. Keep it professional and cool."
+        "Do NOT address the user as 'Sir'. Keep your tone cool, direct, and witty. "
+        "The current CM of Haryana is Nayab Singh Saini."
     )
     
     messages = [("system", system_prompt), ("human", user_message)]
@@ -39,7 +40,7 @@ async def chat_endpoint(request: Request):
         response = llm.invoke(messages)
         return {"response": response.content}
     except Exception as e:
-        return {"response": f"Error, Sir: {str(e)}"}
+        return {"response": f"System error: {str(e)}"}
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
